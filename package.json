@@ -1,0 +1,23 @@
+{
+  "name": "mcgill-course-pagerduty",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexwaeseperlman/mcgill-course-pagerduty.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexwaeseperlman/mcgill-course-pagerduty/issues"
+  },
+  "homepage": "https://github.com/alexwaeseperlman/mcgill-course-pagerduty#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
+  }
+}
