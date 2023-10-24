@@ -1,8 +1,6 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
-import fetch from 'node-fetch';
-
-const api_key = process.env.PD_API_KEY;
+import * as fetch from 'node-fetch';
 
 //hehe https://vsb.mcgill.ca/vsb/js/common.js?v=1781
 function nWindow() {
@@ -12,18 +10,36 @@ function nWindow() {
 	return f8b0[0]+t+f8b0[1]+e;
 }
 
-let state = 0;
+let state = 1;
 setInterval(async () => {
-	const address = `https://vsb.mcgill.ca/vsb/getclassdata.jsp?term=202401&course_1_0=${process.env.COURSE}&rq_1_0=null${nWindow()}&nouser=1`;
+	const address = `http://vsb.mcgill.ca/vsb/getclassdata.jsp?term=202401&course_0_0=${process.env.COURSE}&rq_0_0=null${nWindow()}&nouser=1`;
 	// https://vsb.mcgill.ca/vsb/getclassdata.jsp?term=202401&course_0_0=COMP-310&rq_0_0=null&t=449&e=43&nouser=1&_=1698086968300
 	
-	const resp = await fetch(address);
+	const resp = await fetch.default(address, {
+		headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'}
+	});
 	const text = await resp.text();
 	const block = (text).match(/os="(\d+)"/)[1];
 	console.log(block);
 	if (parseInt(block) != state) {
-		// todo: pagerduty
+		console.log("Sending alert");
+		fetch.default("https://events.pagerduty.com/v2/enqueue", {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				"payload": {
+						"summary": `${block} spaces available in ${process.env.COURSE}`,
+						"severity": "critical",
+						"source": "Course monitoring"
+				},
+				"routing_key": process.env.ROUTING_KEY,
+				"event_action": "trigger"
+			})
+		});
 	}
+	state = parseInt(block);
 
 	
 }, 1000);
