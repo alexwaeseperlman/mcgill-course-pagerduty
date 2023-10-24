@@ -42,4 +42,4 @@ setInterval(async () => {
 	state = parseInt(block);
 
 	
-}, 1000);
+}, 120000);
