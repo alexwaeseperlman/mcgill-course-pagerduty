@@ -19,10 +19,29 @@ setInterval(async () => {
 		headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36'}
 	});
 	const text = await resp.text();
-	const block = (text).match(/os="(\d+)"/)[1];
-	console.log(block);
-	if (parseInt(block) != state) {
-		console.log("Sending alert");
+	try {
+		const block = (text).match(/os="(\d+)"/)[1];
+		if (parseInt(block) != state) {
+			console.log("Sending alert");
+			fetch.default("https://events.pagerduty.com/v2/enqueue", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					"payload": {
+							"summary": `${block} spaces available in ${process.env.COURSE}`,
+							"severity": "critical",
+							"source": "Course monitoring"
+					},
+					"routing_key": process.env.ROUTING_KEY,
+					"event_action": "trigger"
+				})
+			});
+		}
+		state = parseInt(block);
+	}
+	catch (err) {
 		fetch.default("https://events.pagerduty.com/v2/enqueue", {
 			method: 'POST',
 			headers: {
@@ -30,7 +49,7 @@ setInterval(async () => {
 			},
 			body: JSON.stringify({
 				"payload": {
-						"summary": `${block} spaces available in ${process.env.COURSE}`,
+						"summary": `${process.env.COURSE} failed`,
 						"severity": "critical",
 						"source": "Course monitoring"
 				},
@@ -39,7 +58,4 @@ setInterval(async () => {
 			})
 		});
 	}
-	state = parseInt(block);
-
-	
-}, 1000);
+}, 120000);
